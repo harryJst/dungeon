@@ -52,15 +52,15 @@ import java.util.Map;
 
 final class CommandSets {
 
-  private Map<String, CommandSet> commandSetMap;
+  private final Map<String, CommandSet> commandSetMap;
   private DebugWaitParser debugWaitParser;
-  private AchievementTrackerWriter achievementTrackerWriter;
+
+
+  //private AchievementTrackerWriter achievementTrackerWriter; //TODO what is this
 
   CommandSets(Game g) {
-    //throw new AssertionError();
     commandSetMap= initializeCommandSetMap(g);
     debugWaitParser = new DebugWaitParser();
-
   }
 
   @NotNull

@@ -22,19 +22,19 @@ class WorldMapSymbol {
     this.color = color;
   }
 
-  public static WorldMapSymbol makeSymbol(@NotNull Location location) {
+   static WorldMapSymbol makeSymbol(@NotNull Location location) {
     return new WorldMapSymbol(location.getDescription().getSymbol(), location.getDescription().getColor());
   }
 
-  public static WorldMapSymbol getHeroSymbol() {
+   static WorldMapSymbol getHeroSymbol() {
     return HERO_SYMBOL;
   }
 
-  public static WorldMapSymbol getNotYetGeneratedSymbol() {
+   static WorldMapSymbol getNotYetGeneratedSymbol() {
     return NOT_YET_GENERATED_SYMBOL;
   }
 
-  public String getCharacterAsString() {
+   String getCharacterAsString() {
     return character;
   }
 

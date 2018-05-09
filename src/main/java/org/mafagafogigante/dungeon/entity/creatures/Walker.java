@@ -15,7 +15,7 @@ import java.io.Serializable;
 /**
  * A Walker that is capable of moving between Locations. The Hero needs a Walker component in order to move around.
  */
-class Walker implements Serializable {
+final class Walker implements Serializable {
 
   private static final long serialVersionUID = Version.MAJOR;
   private static final int WALK_BLOCKED = 2;

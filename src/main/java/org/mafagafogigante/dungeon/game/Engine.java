@@ -13,11 +13,11 @@ import java.io.Serializable;
 /**
  * Engine class that contains most static methods that need to be called to alter the loaded GameState.
  */
-public class Engine implements Serializable{
+public final class Engine implements Serializable{
 
   private static final int BATTLE_TURN_DURATION = 30;
 
-  private GameState gameState;
+  private final GameState gameState;
 
   Engine(GameState gameState) {
         this.gameState = gameState;
@@ -79,7 +79,7 @@ public class Engine implements Serializable{
   /**
    * Ends the turn, refreshing the game state and checking if any achievements were unlocked.
    */
-  public void endTurn() {
+   void endTurn() {
     silentRefresh();
     refreshAchievements();
   }

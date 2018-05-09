@@ -20,21 +20,24 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-public class Game implements Serializable{
+public final class Game implements Serializable{
 
   private final InstanceInformation instanceInformation = new InstanceInformation();
 
   private GameWindow gameWindow;
   private GameState gameState;
-  private IssuedCommandProcessor issuedCommandProcessor;
+  private final IssuedCommandProcessor issuedCommandProcessor;
 
 
   public Game(){
+    gameState = new GameState();
     issuedCommandProcessor = new IssuedCommandProcessor(this);
   }
 
   private void start(final Game g){
     final StopWatch stopWatch = new StopWatch();
+
+
     DungeonLogger.info("Started initializing Dungeon " + Version.getCurrentVersion() + ".");
 
 

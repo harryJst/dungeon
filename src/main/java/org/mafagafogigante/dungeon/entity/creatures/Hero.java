@@ -38,7 +38,7 @@ import java.util.Locale;
 /**
  * Hero class that defines the creature that the player controls.
  */
-public class Hero extends Creature {
+public final class Hero extends Creature {
 
   private static final long serialVersionUID = Version.MAJOR;
   // The longest possible sleep starts at 19:00 and ends at 05:15 (takes 10 hours and 15 minutes).

@@ -33,6 +33,12 @@ public class Observer implements Serializable {
 
   private static final long serialVersionUID = Version.MAJOR;
   private static final VisibilityCriteria ADJACENT_LOCATIONS_VISIBILITY;
+  private final Creature creature;
+
+  public Observer(@NotNull Creature creature) {
+    this.creature = creature;
+  }
+
 
   static {
     LuminosityVisibilityCriterion luminosity = new LuminosityVisibilityCriterion(new Luminosity(new Percentage(0.4)));
@@ -43,11 +49,7 @@ public class Observer implements Serializable {
   }
 
 
-  private final Creature creature;
 
-  public Observer(@NotNull Creature creature) {
-    this.creature = creature;
-  }
 
   private static List<Point> listAdjacentPoints(Point point) {
     List<Point> adjacentPoints = new ArrayList<>(4);

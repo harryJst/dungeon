@@ -21,7 +21,7 @@ public class GameState implements Serializable {
   private Version gameVersion = Version.getCurrentVersion();
 
 
-  private Engine engine;
+  private Engine eninge;
 
   private transient boolean saved = false;
 
@@ -29,7 +29,7 @@ public class GameState implements Serializable {
    * Constructs a new GameState.
    */
   public GameState() {
-    engine = new Engine(this);
+    eninge = new Engine(this);
     commandHistory = new CommandHistory();
     world = new World(statistics.getWorldStatistics());
     createHeroAndStartingLocation();
@@ -89,5 +89,5 @@ public class GameState implements Serializable {
     this.gameVersion = version;
   }
 
-  public Engine getEngine() { return engine; }
+  public Engine getEngine() { return eninge; }
 }
