@@ -5,6 +5,7 @@ import org.mafagafogigante.dungeon.entity.items.CreatureInventory.SimulationResu
 import org.mafagafogigante.dungeon.entity.items.Item;
 import org.mafagafogigante.dungeon.entity.items.ItemFactory;
 import org.mafagafogigante.dungeon.game.Game;
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.game.Id;
 import org.mafagafogigante.dungeon.game.World;
 import org.mafagafogigante.dungeon.io.Version;
@@ -25,6 +26,10 @@ public final class CreatureFactory implements Serializable {
 
   private static final long serialVersionUID = Version.MAJOR;
   private final Map<Id, CreaturePreset> creaturePresets = new HashMap<>();
+//  static Game game;
+//  public static void setGame(Game g){
+//    game = g;
+//  }
 
   /**
    * Constructs an ItemFactory from one or more CreaturePresetFactories.
@@ -95,11 +100,11 @@ public final class CreatureFactory implements Serializable {
    *
    * <p>Also adds the new creature to the statistics.
    */
-  public Creature makeCreature(Id id, World world) {
+  public Creature makeCreature(Id id, World world, GameState gameState) {
     CreaturePreset preset = creaturePresets.get(id);
     if (preset != null) {
       Creature creature = new Creature(preset);
-      Game.getGameState().getStatistics().getWorldStatistics().addSpawn(creature.getName().getSingular());
+      gameState.getStatistics().getWorldStatistics().addSpawn(creature.getName().getSingular());
       giveItems(creature, world);
       return creature;
     } else {
@@ -113,7 +118,7 @@ public final class CreatureFactory implements Serializable {
    * @param date the Date when the Items the Hero has were created
    * @return the Hero object
    */
-  public Hero makeHero(Date date, World world, Statistics statistics) {
+  public Hero makeHero(Date date, World world, Statistics statistics, GameState g) {
     DateOfBirthGenerator dateOfBirthGenerator = new DateOfBirthGenerator(date, 30);
     Date dateOfBirth = dateOfBirthGenerator.generateDateOfBirth();
     Hero hero = new Hero(creaturePresets.get(new Id("HERO")), statistics, dateOfBirth);

@@ -2,10 +2,7 @@ package org.mafagafogigante.dungeon.commands;
 
 import org.mafagafogigante.dungeon.date.DungeonTimeParser;
 import org.mafagafogigante.dungeon.date.Duration;
-import org.mafagafogigante.dungeon.game.DungeonString;
-import org.mafagafogigante.dungeon.game.Engine;
-import org.mafagafogigante.dungeon.game.Game;
-import org.mafagafogigante.dungeon.game.PartOfDay;
+import org.mafagafogigante.dungeon.game.*;
 import org.mafagafogigante.dungeon.io.Writer;
 import org.mafagafogigante.dungeon.util.Matches;
 import org.mafagafogigante.dungeon.util.Messenger;
@@ -21,14 +18,17 @@ import java.util.Arrays;
  */
 class DebugWaitParser {
 
-  private DebugWaitParser() {
-    throw new AssertionError();
+
+
+
+   DebugWaitParser() {
   }
+
 
   /**
    * Evaluates and returns a constant representing which syntax was used.
    */
-  private static Syntax evaluateSyntax(String[] arguments) {
+  private Syntax evaluateSyntax(String[] arguments) {
     if (isForSyntax(arguments)) {
       return Syntax.FOR;
     } else if (isUntilNextSyntax(arguments)) {
@@ -38,15 +38,15 @@ class DebugWaitParser {
     }
   }
 
-  private static boolean isForSyntax(String[] arguments) {
+  private boolean isForSyntax(String[] arguments) {
     return arguments.length > 1 && "for".equalsIgnoreCase(arguments[0]);
   }
 
-  private static boolean isUntilNextSyntax(String[] arguments) {
+  private boolean isUntilNextSyntax(String[] arguments) {
     return arguments.length > 2 && "until".equalsIgnoreCase(arguments[0]) && "next".equalsIgnoreCase(arguments[1]);
   }
 
-  private static void writeDebugWaitSyntax() {
+  private void writeDebugWaitSyntax() {
     DungeonString string = new DungeonString();
     string.append("Usage: wait ");
     final Color highlightColor = Color.ORANGE;
@@ -61,7 +61,7 @@ class DebugWaitParser {
     Writer.write(string);
   }
 
-  static void parseDebugWait(@NotNull String[] arguments) {
+   void parseDebugWait(@NotNull String[] arguments, GameState gameState) {
     Syntax syntax = evaluateSyntax(arguments);
     if (syntax == Syntax.INVALID) {
       writeDebugWaitSyntax();
@@ -70,7 +70,7 @@ class DebugWaitParser {
         String timeString = StringUtils.join(arguments, " ", 1, arguments.length);
         try {
           Duration duration = DungeonTimeParser.parseDuration(timeString);
-          rollDate(duration.getSeconds());
+          rollDate(duration.getSeconds(), gameState);
         } catch (IllegalArgumentException badArgument) {
           Writer.write("Provide small positive multipliers and units such as: '2 minutes and 10 seconds'");
         }
@@ -79,7 +79,7 @@ class DebugWaitParser {
         if (matches.size() == 0) {
           Writer.write("That did not match any part of the day.");
         } else if (matches.size() == 1) {
-          rollDate(PartOfDay.getSecondsToNext(Game.getGameState().getWorld().getWorldDate(), matches.getMatch(0)));
+          rollDate(PartOfDay.getSecondsToNext(gameState.getWorld().getWorldDate(), matches.getMatch(0)), gameState);
         } else {
           Messenger.printAmbiguousSelectionMessage();
         }
@@ -87,8 +87,8 @@ class DebugWaitParser {
     }
   }
 
-  private static void rollDate(long seconds) {
-    Engine.rollDateAndRefresh(seconds);
+  private void rollDate(long seconds, GameState gameState) {
+    gameState.getEngine().rollDateAndRefresh(seconds);
     Writer.write("Waited for " + seconds + " seconds.");
   }
 

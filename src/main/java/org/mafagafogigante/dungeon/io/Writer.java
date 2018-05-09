@@ -20,6 +20,12 @@ public final class Writer {
     throw new AssertionError();
   }
 
+  static Game game = new Game();
+
+  public static void setGame(Game g){
+    game = g;
+  }
+
   /**
    * Writes a string of text using the default output color.
    *
@@ -47,8 +53,8 @@ public final class Writer {
    * @param specifications a WritingSpecifications object
    */
   public static void write(Writable writable, WritingSpecifications specifications) {
-    if (Game.getGameWindow() != null) { // There will be no window when running the tests, so check to prevent a NPE.
-      Game.getGameWindow().scheduleWriteToTextPane(writable, specifications);
+    if (game.getGameWindow() != null) { // There will be no window when running the tests, so check to prevent a NPE.
+      game.getGameWindow().scheduleWriteToTextPane(writable, specifications);
       if (specifications.shouldWait()) {
         Sleeper.sleep(specifications.getWait());
       }

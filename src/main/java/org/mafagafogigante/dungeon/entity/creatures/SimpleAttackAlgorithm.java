@@ -1,6 +1,8 @@
 package org.mafagafogigante.dungeon.entity.creatures;
 
 import org.mafagafogigante.dungeon.entity.items.Item;
+import org.mafagafogigante.dungeon.game.Game;
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.game.Random;
 import org.mafagafogigante.dungeon.stats.CauseOfDeath;
 import org.mafagafogigante.dungeon.stats.TypeOfCauseOfDeath;
@@ -53,7 +55,7 @@ class SimpleAttackAlgorithm implements AttackAlgorithm {
     return DEFAULT_CRITICAL_CHANCE;
   }
 
-  public void renderAttack(@NotNull Creature attacker, @NotNull Creature defender) {
+  public void renderAttack(@NotNull Creature attacker, @NotNull Creature defender, @NotNull GameState gameState) {
     if (Random.roll(getHitRate(attacker))) {
       int damage = attacker.getAttack();
       boolean attackerIsEquippingBrokenWeapon = isEquippingBrokenWeapon(attacker);
@@ -67,7 +69,7 @@ class SimpleAttackAlgorithm implements AttackAlgorithm {
       }
       // Decrement the health of the defender.
       DamageHandler.inflictDamage(attacker, defender, damage);
-      AttackAlgorithmWriter.writeInflictedDamage(attacker, damage, defender, isCriticalHit);
+      AttackAlgorithmWriter.writeInflictedDamage(attacker, damage, defender, isCriticalHit, gameState);
       // Respect the contract: If the defender is dead, set its cause of death.
       if (defender.getHealth().isDead()) {
         if (attackerIsEquippingWorkingWeapon) {
@@ -81,7 +83,7 @@ class SimpleAttackAlgorithm implements AttackAlgorithm {
       // Decrement the integrity of the weapon.
       if (attackerIsEquippingWorkingWeapon) {
         Item weapon = attacker.getWeapon();
-        weapon.decrementIntegrityByHit();
+        weapon.decrementIntegrityByHit(gameState);
         if (weapon.isBroken()) {
           AttackAlgorithmWriter.writeWeaponBreak(weapon);
         }

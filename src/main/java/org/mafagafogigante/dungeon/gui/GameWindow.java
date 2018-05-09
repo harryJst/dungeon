@@ -67,11 +67,15 @@ public class GameWindow extends JFrame {
   /**
    * Constructs a new GameWindow.
    */
-  public GameWindow() {
+  private Game game;
+
+  public GameWindow(Game g) {
+    game = g;
     initComponents();
     document = new SwappingStyledDocument(textPane);
     setVisible(true);
   }
+
 
   public static int getRows() {
     return ROWS;
@@ -168,7 +172,7 @@ public class GameWindow extends JFrame {
       public void actionPerformed(ActionEvent event) {
         if (acceptingNextCommand) {
           clearTextPane();
-          Loader.saveGame(Game.getGameState());
+          Loader.saveGame(game.getGameState(),game);
         }
       }
     });
@@ -294,7 +298,7 @@ public class GameWindow extends JFrame {
             if (IssuedCommand.isValidSource(text)) {
               DungeonLogger.logCommandRenderingReport(text, "started doInBackGround", stopWatch);
               try {
-                Game.renderTurn(new IssuedCommand(text), stopWatch);
+                game.renderTurn(new IssuedCommand(text), stopWatch);
               } catch (Throwable throwable) {
                 logExecutionExceptionAndExit(throwable);
               }
@@ -320,7 +324,7 @@ public class GameWindow extends JFrame {
   private void textFieldKeyPressed(KeyEvent event) {
     int keyCode = event.getKeyCode();
     if (isUpDownOrTab(keyCode)) { // Check if the event is of interest.
-      GameState gameState = Game.getGameState();
+      GameState gameState = game.getGameState();
       if (gameState != null) {
         CommandHistory commandHistory = gameState.getCommandHistory();
         if (keyCode == KeyEvent.VK_UP) {
@@ -427,11 +431,11 @@ public class GameWindow extends JFrame {
     acceptingNextCommand = true;
   }
 
-  private static class ClosingListener extends WindowAdapter {
+  private class ClosingListener extends WindowAdapter {
     @Override
     public void windowClosing(WindowEvent event) {
       super.windowClosing(event);
-      Game.exit();
+      game.exit();
     }
   }
 

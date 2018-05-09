@@ -1,6 +1,8 @@
 package org.mafagafogigante.dungeon.entity.items;
 
 import org.mafagafogigante.dungeon.entity.items.Item.Tag;
+import org.mafagafogigante.dungeon.game.Game;
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.io.Version;
 
 import java.io.Serializable;
@@ -20,8 +22,8 @@ public abstract class BaseInventory implements Serializable {
     items = new ArrayList<>();
   }
 
-  private static boolean isDecomposed(Item item) {
-    return (item.hasTag(Tag.DECOMPOSES) && item.getAge() >= item.getDecompositionPeriod());
+  private boolean isDecomposed(Item item, GameState gameState) {
+    return (item.hasTag(Tag.DECOMPOSES) && item.getAge(gameState) >= item.getDecompositionPeriod());
   }
 
   /**
@@ -59,9 +61,9 @@ public abstract class BaseInventory implements Serializable {
   /**
    * Iterates through the inventory, removing items that shouldn't exist anymore.
    */
-  public void refreshItems() {
+  public void refreshItems(GameState gameState) {
     for (Item item : new ArrayList<>(items)) {
-      if (isDecomposed(item)) {
+      if (isDecomposed(item, gameState)) {
         removeItem(item);
       }
     }

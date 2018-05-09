@@ -1,5 +1,6 @@
 package org.mafagafogigante.dungeon.entity.creatures;
 
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.spells.Spell;
 
 import java.util.List;
@@ -15,6 +16,6 @@ public interface Spellcaster {
 
   void learnSpell(Spell spell);
 
-  void parseCast(String[] arguments);
+  void parseCast(String[] arguments, GameState gameState);
 
 }

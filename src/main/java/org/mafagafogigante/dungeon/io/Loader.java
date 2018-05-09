@@ -65,9 +65,9 @@ public final class Loader {
   /**
    * Prompts the user to confirm an operation using a dialog window.
    */
-  private static boolean confirmOperation(String confirmation) {
-    int result = JOptionPane.showConfirmDialog(Game.getGameWindow(), confirmation, null, JOptionPane.YES_NO_OPTION);
-    Game.getGameWindow().requestFocusOnTextField();
+  private static boolean confirmOperation(String confirmation, Game g) {
+    int result = JOptionPane.showConfirmDialog(g.getGameWindow(), confirmation, null, JOptionPane.YES_NO_OPTION);
+    g.getGameWindow().requestFocusOnTextField();
     return result == JOptionPane.YES_OPTION;
   }
 
@@ -84,14 +84,14 @@ public final class Loader {
   /**
    * Generates a new GameState and returns it.
    */
-  public static GameState newGame() {
+  public static GameState newGame(Game g) {
     GameState gameState = new GameState();
     DungeonString string = new DungeonString();
     string.append("Created a new game.\n\n");
     string.append(gameState.getPreface());
     string.append("\n");
     Writer.write(string);
-    Game.getGameWindow().requestFocusOnTextField();
+    g.getGameWindow().requestFocusOnTextField();
     return gameState;
   }
 
@@ -104,9 +104,9 @@ public final class Loader {
    * @param requireConfirmation whether or not this method should require confirmation from the user
    * @return a GameState or null
    */
-  public static GameState loadGame(boolean requireConfirmation) {
+  public static GameState loadGame(boolean requireConfirmation, Game g) {
     if (checkForSave()) {
-      if (!requireConfirmation || confirmOperation(LOAD_CONFIRM)) {
+      if (!requireConfirmation || confirmOperation(LOAD_CONFIRM, g)) {
         return loadFile(getMostRecentlySavedFile());
       }
     }
@@ -125,7 +125,7 @@ public final class Loader {
    *
    * <p>This method guarantees that the if null is returned, something is written to the screen.
    */
-  public static GameState parseLoadCommand(String[] arguments) {
+  public static GameState parseLoadCommand(String[] arguments,Game g) {
     if (arguments.length != 0) {
       // A save name was provided.
       String argument = arguments[0];
@@ -138,7 +138,7 @@ public final class Loader {
         return null;
       }
     } else {
-      GameState loadResult = loadGame(false); // Don't ask for confirmation. Typing load is not an easy mistake.
+      GameState loadResult = loadGame(false,g); // Don't ask for confirmation. Typing load is not an easy mistake.
       if (loadResult == null) {
         Writer.write("No saved game could be found.");
       }
@@ -149,8 +149,8 @@ public final class Loader {
   /**
    * Saves the specified GameState to the default save file.
    */
-  public static void saveGame(GameState gameState) {
-    saveGame(gameState, null);
+  public static void saveGame(GameState gameState, Game g) {
+      saveGame(gameState, null,g);
   }
 
   /**
@@ -158,12 +158,12 @@ public final class Loader {
    *
    * <p>Only asks for confirmation if there already is a save file with the name.
    */
-  public static void saveGame(GameState gameState, String[] arguments) {
+  public static void saveGame(GameState gameState, String[] arguments,Game g) {
     String saveName = DEFAULT_SAVE_NAME;
     if (arguments != null && arguments.length != 0) {
       saveName = arguments[0];
     }
-    if (saveFileDoesNotExist(saveName) || confirmOperation(SAVE_CONFIRM)) {
+    if (saveFileDoesNotExist(saveName) || confirmOperation(SAVE_CONFIRM,g)) {
       saveFile(gameState, saveName);
     }
   }

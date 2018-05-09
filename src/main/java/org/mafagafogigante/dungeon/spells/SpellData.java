@@ -4,14 +4,7 @@ import org.mafagafogigante.dungeon.entity.creatures.Creature;
 import org.mafagafogigante.dungeon.entity.creatures.Hero;
 import org.mafagafogigante.dungeon.entity.creatures.HeroUtils;
 import org.mafagafogigante.dungeon.entity.items.Item;
-import org.mafagafogigante.dungeon.game.BlockedEntrances;
-import org.mafagafogigante.dungeon.game.Direction;
-import org.mafagafogigante.dungeon.game.DungeonString;
-import org.mafagafogigante.dungeon.game.Engine;
-import org.mafagafogigante.dungeon.game.Id;
-import org.mafagafogigante.dungeon.game.Location;
-import org.mafagafogigante.dungeon.game.Point;
-import org.mafagafogigante.dungeon.game.Random;
+import org.mafagafogigante.dungeon.game.*;
 import org.mafagafogigante.dungeon.io.Writer;
 import org.mafagafogigante.dungeon.stats.CauseOfDeath;
 import org.mafagafogigante.dungeon.stats.TypeOfCauseOfDeath;
@@ -31,15 +24,15 @@ public final class SpellData {
       private static final int SECONDS_TO_CAST_HEAL = 25;
 
       @Override
-      public void operate(Hero hero, String[] targetMatcher) {
+      public void operate(Hero hero, String[] targetMatcher, GameState gameState) {
         if (targetMatcher.length == 0) {
-          Engine.rollDateAndRefresh(SECONDS_TO_CAST_HEAL);
+          gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_HEAL);
           hero.getHealth().incrementBy(HEALING_VALUE);
           writeHealCastOnSelf(hero);
         } else {
           Creature target = hero.findCreature(targetMatcher);
           if (target != null) {
-            Engine.rollDateAndRefresh(SECONDS_TO_CAST_HEAL);
+            gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_HEAL);
             if (hero == target) { // The player used cast ... on <character name>.
               writeHealCastOnSelf(hero);
             } else {
@@ -69,7 +62,7 @@ public final class SpellData {
       private static final int SECONDS_TO_CAST_REPAIR = 10;
 
       @Override
-      public void operate(Hero hero, String[] targetMatcher) {
+      public void operate(Hero hero, String[] targetMatcher, GameState gameState) {
         List<Item> selectedItems = new ArrayList<>();
         if (targetMatcher.length == 0) {
           if (hero.getWeapon() == null) {
@@ -81,15 +74,15 @@ public final class SpellData {
           selectedItems.addAll(HeroUtils.findItems(hero.getInventory().getItems(), targetMatcher));
         }
         for (Item item : selectedItems) {
-          effectivelyOperate(hero, item);
+          effectivelyOperate(hero, item, gameState);
         }
       }
 
-      private void effectivelyOperate(Hero hero, Item item) {
+      private void effectivelyOperate(Hero hero, Item item, GameState gameState) {
         if (!item.hasTag(Item.Tag.REPAIRABLE)) {
           Writer.write(item.getName().getSingular() + " is not repairable.");
         } else {
-          Engine.rollDateAndRefresh(SECONDS_TO_CAST_REPAIR); // Time passes before casting.
+          gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_REPAIR); // Time passes before casting.
           if (!hero.getInventory().hasItem(item)) { // If the item disappeared.
             Writer.write(item.getName().getSingular() + " disappeared before you finished casting.");
           } else {
@@ -111,8 +104,8 @@ public final class SpellData {
       private static final int SECONDS_TO_CAST_PERCEIVE = 15;
 
       @Override
-      public void operate(Hero hero, String[] targetMatcher) {
-        Engine.rollDateAndRefresh(SECONDS_TO_CAST_PERCEIVE);
+      public void operate(Hero hero, String[] targetMatcher, GameState gameState) {
+        gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_PERCEIVE);
         List<Creature> creatureList = new ArrayList<>(hero.getLocation().getCreatures());
         creatureList.remove(hero);
         DungeonString string = new DungeonString();
@@ -126,13 +119,13 @@ public final class SpellData {
       private static final int SECONDS_TO_CAST_FINGER_OF_DEATH = 10;
 
       @Override
-      public void operate(Hero hero, String[] targetMatcher) {
+      public void operate(Hero hero, String[] targetMatcher, GameState gameState) {
         if (targetMatcher.length == 0) {
           Writer.write("Provide a target.");
         } else {
           Creature target = hero.findCreature(targetMatcher);
           if (target != null) {
-            Engine.rollDateAndRefresh(SECONDS_TO_CAST_FINGER_OF_DEATH);
+            gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_FINGER_OF_DEATH);
             DungeonString string = new DungeonString();
             string.append("You casted ");
             string.append(getName().getSingular());
@@ -155,13 +148,13 @@ public final class SpellData {
       private static final int SECONDS_TO_CAST_VEIL_OF_DARKNESS = 60;
 
       @Override
-      public void operate(Hero hero, String[] targetMatcher) {
+      public void operate(Hero hero, String[] targetMatcher, GameState gameState) {
         if (targetMatcher.length == 0) {
           Writer.write("Provide a target.");
         } else {
           Creature target = hero.findCreature(targetMatcher);
           if (target != null) {
-            Engine.rollDateAndRefresh(SECONDS_TO_CAST_VEIL_OF_DARKNESS);
+            gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_VEIL_OF_DARKNESS);
             target.getLightSource().disable();
             Writer.write("You casted " + getName() + " on " + target.getName().getSingular() + ".");
           }
@@ -173,13 +166,13 @@ public final class SpellData {
       static final int SECONDS_TO_CAST_UNVEIL = 10;
 
       @Override
-      public void operate(Hero hero, String[] targetMatcher) {
+      public void operate(Hero hero, String[] targetMatcher, GameState gameState) {
         if (targetMatcher.length == 0) {
           Writer.write("Provide a target.");
         } else {
           Creature target = hero.findCreature(targetMatcher);
           if (target != null) {
-            Engine.rollDateAndRefresh(SECONDS_TO_CAST_UNVEIL);
+            gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_UNVEIL);
             target.getLightSource().enable();
             Writer.write("You casted " + getName() + " on " + target.getName().getSingular() + ".");
           }
@@ -192,13 +185,13 @@ public final class SpellData {
       static final double DISPLACE_PROBABILITY = 0.5;
 
       @Override
-      public void operate(Hero hero, String[] targetMatcher) {
+      public void operate(Hero hero, String[] targetMatcher, GameState gameState) {
         if (targetMatcher.length == 0) {
           Writer.write("Provide a target.");
         } else {
           Creature target = hero.findCreature(targetMatcher);
           if (target != null) {
-            Engine.rollDateAndRefresh(SECONDS_TO_CAST_DISPLACE);
+            gameState.getEngine().rollDateAndRefresh(SECONDS_TO_CAST_DISPLACE);
             if (Random.roll(DISPLACE_PROBABILITY)) {
               Location targetLocation = target.getLocation();
               BlockedEntrances blockedEntrances = targetLocation.getBlockedEntrances();

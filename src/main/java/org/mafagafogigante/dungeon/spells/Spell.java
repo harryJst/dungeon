@@ -1,6 +1,7 @@
 package org.mafagafogigante.dungeon.spells;
 
 import org.mafagafogigante.dungeon.entity.creatures.Hero;
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.game.Id;
 import org.mafagafogigante.dungeon.game.Name;
 import org.mafagafogigante.dungeon.io.Version;
@@ -20,7 +21,7 @@ public abstract class Spell implements Selectable, Serializable {
     this.definition = new SpellDefinition(id, name);
   }
 
-  public abstract void operate(Hero hero, String[] targetMatcher);
+  public abstract void operate(Hero hero, String[] targetMatcher, GameState gameState);
 
   public Id getId() {
     return definition.id; // Delegate to SpellDefinition.

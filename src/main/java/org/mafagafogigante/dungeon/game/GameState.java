@@ -20,12 +20,16 @@ public class GameState implements Serializable {
   private Point heroPosition;
   private Version gameVersion = Version.getCurrentVersion();
 
+
+  private Engine engine;
+
   private transient boolean saved = false;
 
   /**
    * Constructs a new GameState.
    */
   public GameState() {
+    engine = new Engine(this);
     commandHistory = new CommandHistory();
     world = new World(statistics.getWorldStatistics());
     createHeroAndStartingLocation();
@@ -43,7 +47,7 @@ public class GameState implements Serializable {
    * Creates the Hero and the starting Location.
    */
   private void createHeroAndStartingLocation() {
-    hero = world.getCreatureFactory().makeHero(world.getWorldDate(), world, statistics);
+    hero = world.getCreatureFactory().makeHero(world.getWorldDate(), world, statistics, this);
     heroPosition = new Point(0, 0, 0);
     world.getLocation(heroPosition).addCreature(hero);
     getStatistics().getExplorationStatistics().addVisit(heroPosition, world.getLocation(heroPosition).getId());
@@ -85,4 +89,5 @@ public class GameState implements Serializable {
     this.gameVersion = version;
   }
 
+  public Engine getEngine() { return engine; }
 }

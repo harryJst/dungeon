@@ -1,5 +1,6 @@
 package org.mafagafogigante.dungeon.entity.creatures;
 
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.io.Split;
 import org.mafagafogigante.dungeon.io.Version;
 import org.mafagafogigante.dungeon.io.Writer;
@@ -46,7 +47,7 @@ public class HeroSpellcaster implements Serializable, Spellcaster {
   }
 
   @Override
-  public void parseCast(String[] arguments) {
+  public void parseCast(String[] arguments, GameState gameState) {
     if (arguments.length > 0) {
       Split split = Split.splitOnOn(Arrays.asList(arguments));
       List<String> spellMatcher = split.getBefore();
@@ -60,7 +61,7 @@ public class HeroSpellcaster implements Serializable, Spellcaster {
       if (matches.getDifferentNames() == 1) {
         Spell spell = matches.getMatch(0);
         DungeonLogger.info("Casted " + spell.getName().getSingular() + ".");
-        spell.operate(hero, targetMatcherArray);
+        spell.operate(hero, targetMatcherArray, gameState);
       } else if (matches.getDifferentNames() > 1) {
         Writer.write("Provided input is ambiguous in respect to spell.");
       }

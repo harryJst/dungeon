@@ -1,6 +1,7 @@
 package org.mafagafogigante.dungeon.commands;
 
 import org.jetbrains.annotations.NotNull;
+import org.mafagafogigante.dungeon.game.Game;
 
 import java.util.Collections;
 
@@ -9,22 +10,27 @@ import java.util.Collections;
  */
 public class IssuedCommandProcessor {
 
-  private IssuedCommandProcessor() {
-    throw new AssertionError();
+  //TODO this needs a CommandSets object.
+
+  private CommandSets commandSets;
+
+  public IssuedCommandProcessor(Game g) {
+    commandSets = new CommandSets(g);
+
   }
 
   /**
    * Evaluates an IssuedCommand. This method will check if the IssuedCommand is valid or not and provide suggestions if
    * it is not.
    */
-  public static IssuedCommandEvaluation evaluateIssuedCommand(@NotNull IssuedCommand issuedCommand) {
+  public IssuedCommandEvaluation evaluateIssuedCommand(@NotNull IssuedCommand issuedCommand) {
     CommandSet collection;
     String commandToken;
-    if (issuedCommand.getTokens().size() > 1 && CommandSets.hasCommandSet(issuedCommand.getTokens().get(0))) {
-      collection = CommandSets.getCommandSet(issuedCommand.getTokens().get(0));
+    if (issuedCommand.getTokens().size() > 1 && commandSets.hasCommandSet(issuedCommand.getTokens().get(0))) {
+      collection = commandSets.getCommandSet(issuedCommand.getTokens().get(0));
       commandToken = issuedCommand.getTokens().get(1);
     } else {
-      collection = CommandSets.getCommandSet("default");
+      collection = commandSets.getCommandSet("default");
       commandToken = issuedCommand.getTokens().get(0);
     }
     // At this point. Both collection and commandToken are not null.
@@ -39,16 +45,16 @@ public class IssuedCommandProcessor {
    * Prepares an IssuedCommand. As a precondition, evaluateIssueCommand should have considered this IssuedCommand
    * valid.
    */
-  public static PreparedIssuedCommand prepareIssuedCommand(@NotNull IssuedCommand issuedCommand) {
+  public PreparedIssuedCommand prepareIssuedCommand(@NotNull IssuedCommand issuedCommand) {
     CommandSet collection;
     String commandToken;
     int indexOfFirstArgument;
-    if (issuedCommand.getTokens().size() > 1 && CommandSets.hasCommandSet(issuedCommand.getTokens().get(0))) {
-      collection = CommandSets.getCommandSet(issuedCommand.getTokens().get(0));
+    if (issuedCommand.getTokens().size() > 1 && commandSets.hasCommandSet(issuedCommand.getTokens().get(0))) {
+      collection = commandSets.getCommandSet(issuedCommand.getTokens().get(0));
       commandToken = issuedCommand.getTokens().get(1);
       indexOfFirstArgument = 2;
     } else {
-      collection = CommandSets.getCommandSet("default");
+      collection = commandSets.getCommandSet("default");
       commandToken = issuedCommand.getTokens().get(0);
       indexOfFirstArgument = 1;
     }

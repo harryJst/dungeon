@@ -1,6 +1,8 @@
 package org.mafagafogigante.dungeon.entity.items;
 
 import org.mafagafogigante.dungeon.entity.Integrity;
+import org.mafagafogigante.dungeon.game.Game;
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.io.Version;
 import org.mafagafogigante.dungeon.util.Percentage;
 
@@ -16,16 +18,18 @@ public class ItemIntegrity implements Serializable {
   private static final long serialVersionUID = Version.MAJOR;
   private final Integrity integrity;
   private final Item item;
+  //private BreakageHandler breakageHandler;
 
-  private ItemIntegrity(@NotNull Integrity integrity, @NotNull Item item) {
+  private ItemIntegrity(@NotNull Integrity integrity, @NotNull Item item ) {
     this.integrity = new Integrity(integrity);
     this.item = item;
+    //this.breakageHandler = new BreakageHandler(g);
   }
 
   /**
    * Makes a new ItemIntegrity object for the specified item from the provided Integrity.
    */
-  public static ItemIntegrity makeItemIntegrity(@NotNull Integrity integrity, @NotNull Item item) {
+   static ItemIntegrity makeItemIntegrity(@NotNull Integrity integrity, @NotNull Item item ) {
     return new ItemIntegrity(integrity, item);
   }
 
@@ -69,10 +73,10 @@ public class ItemIntegrity implements Serializable {
    *
    * @param amount a nonnegative integer
    */
-  public void decrementBy(int amount) { // Must exist. After delegating the decrement, this method checks for breakage.
+   void decrementBy(int amount, GameState gameState) { // Must exist. After delegating the decrement, this method checks for breakage.
     integrity.decrementBy(amount);
     if (isBroken()) {
-      BreakageHandler.handleBreakage(item);
+      BreakageHandler.handleBreakage(item,gameState);
     }
   }
 

@@ -5,6 +5,7 @@ import org.mafagafogigante.dungeon.date.Date;
 import org.mafagafogigante.dungeon.date.Duration;
 import org.mafagafogigante.dungeon.game.DungeonString;
 import org.mafagafogigante.dungeon.game.Game;
+import org.mafagafogigante.dungeon.game.GameState;
 import org.mafagafogigante.dungeon.io.Writer;
 
 import java.awt.Color;
@@ -18,15 +19,22 @@ public class AchievementTrackerWriter {
   /**
    * Parses an issued command that makes the game write to the screen all achievements the Hero has unlocked so far.
    */
-  public static void parseCommand(String[] arguments) {
+
+
+  public static void parseCommand(String[] arguments, GameState gameState) {
     Comparator<UnlockedAchievement> comparator = getComparator(arguments);
     if (comparator != null) {
-      AchievementTracker achievementTracker = Game.getGameState().getHero().getAchievementTracker();
-      writeAchievementTracker(achievementTracker, comparator);
+      AchievementTracker achievementTracker = gameState.getHero().getAchievementTracker();
+      writeAchievementTracker(achievementTracker, comparator,gameState);
     } else {
       writeValidOrderings();
     }
   }
+
+//  static Game game;
+//  public static void setGame(Game g){
+//    game = g;
+//  }
 
   /**
    * Parses an IssuedCommand trying to identify the specified ordering for the achievements. If nothing is specified,
@@ -54,9 +62,9 @@ public class AchievementTrackerWriter {
    * @param tracker the AchievementTracker, not null
    * @param comparator the Comparator, not null
    */
-  private static void writeAchievementTracker(AchievementTracker tracker, Comparator<UnlockedAchievement> comparator) {
+  private static void writeAchievementTracker(AchievementTracker tracker, Comparator<UnlockedAchievement> comparator, GameState gameState) {
     List<UnlockedAchievement> unlockedAchievements = tracker.getUnlockedAchievements(comparator);
-    Date now = Game.getGameState().getWorld().getWorldDate();
+    Date now = gameState.getWorld().getWorldDate();
     DungeonString string = new DungeonString();
     for (UnlockedAchievement unlockedAchievement : unlockedAchievements) {
       Duration sinceUnlock = new Duration(unlockedAchievement.getDate(), now);

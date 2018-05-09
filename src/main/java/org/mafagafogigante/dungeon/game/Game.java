@@ -1,8 +1,6 @@
 package org.mafagafogigante.dungeon.game;
 
-import org.mafagafogigante.dungeon.commands.IssuedCommand;
-import org.mafagafogigante.dungeon.commands.IssuedCommandEvaluation;
-import org.mafagafogigante.dungeon.commands.IssuedCommandProcessor;
+import org.mafagafogigante.dungeon.commands.*;
 import org.mafagafogigante.dungeon.gui.GameWindow;
 import org.mafagafogigante.dungeon.io.Loader;
 import org.mafagafogigante.dungeon.io.Version;
@@ -14,6 +12,7 @@ import org.mafagafogigante.dungeon.util.Utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,23 +20,28 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-public class Game {
+public class Game implements Serializable{
 
-  private static final InstanceInformation instanceInformation = new InstanceInformation();
+  private final InstanceInformation instanceInformation = new InstanceInformation();
 
-  private static GameWindow gameWindow;
-  private static GameState gameState;
+  private GameWindow gameWindow;
+  private GameState gameState;
+  private IssuedCommandProcessor issuedCommandProcessor;
 
-  /**
-   * The main method.
-   */
-  public static void main(String[] args) {
+
+  public Game(){
+    issuedCommandProcessor = new IssuedCommandProcessor(this);
+  }
+
+  private void start(final Game g){
     final StopWatch stopWatch = new StopWatch();
     DungeonLogger.info("Started initializing Dungeon " + Version.getCurrentVersion() + ".");
+
+
     invokeOnEventDispatchThreadAndWait(new Runnable() {
       @Override
       public void run() {
-        gameWindow = new GameWindow();
+        gameWindow = new GameWindow(g);
       }
     });
     DungeonLogger.info("Finished making the window. Took " + stopWatch.toString() + ".");
@@ -51,11 +55,37 @@ public class Game {
     });
   }
 
+
+  /**
+   * The main method.
+   */
+  public static void main(String[] args) {
+    Game g = new Game();
+
+    //AttackAlgorithmWriter.setGame(g);
+//    ClockComponent.setGame(g);
+
+    //this should be the only component to directly set the game
+    //game should even contain the writer class as it shouldnt be statically delegated
+    Writer.setGame(g);
+//    WorldMap.setGame(g);
+//    Observer.setGame(g);
+//    Item.setGame(g);
+//    CreatureFactory.setGame(g);
+//    DebugWaitParser.setGame(g);
+//    BreakageHandler.setGame(g);
+//    Engine.setGame(g);
+//    Walker.setGame(g);
+//    Hero.setGame(g);
+
+    g.start(g);
+  }
+
   /**
    * Invokes a runnable on the EDT and waits for it to finish. If an exception is thrown, this method logs it and
    * finishes the application.
    */
-  private static void invokeOnEventDispatchThreadAndWait(Runnable runnable) {
+  private void invokeOnEventDispatchThreadAndWait(Runnable runnable) {
     try {
       SwingUtilities.invokeAndWait(runnable);
     } catch (InterruptedException | InvocationTargetException fatal) {
@@ -68,10 +98,10 @@ public class Game {
    *
    * <p>If a new GameState is created and the saves folder is empty, the tutorial is suggested.
    */
-  private static GameState getInitialGameState() {
-    GameState gameState = Loader.loadGame(true);
+  private GameState getInitialGameState() {
+    GameState gameState = Loader.loadGame(true, this);
     if (gameState == null) {
-      gameState = Loader.newGame();
+      gameState = Loader.newGame(this);
       // Note that loadedGameState may be null even if a save exists (if the player declined to load it).
       // So check for any save in the folder.
       if (!Loader.checkForSave()) { // Suggest the tutorial only if no saved game exists.
@@ -88,22 +118,22 @@ public class Game {
   /**
    * Gets a GameState object. Should be invoked to get a GameState after the Hero dies.
    */
-  private static GameState getAfterDeathGameState() {
-    GameState gameState = Loader.loadGame(false);
+  private GameState getAfterDeathGameState() {
+    GameState gameState = Loader.loadGame(false,this);
     if (gameState != null) {
       JOptionPane.showMessageDialog(getGameWindow(), "Loaded the most recent saved game.");
     } else {
-      gameState = Loader.newGame();
+      gameState = Loader.newGame(this);
       JOptionPane.showMessageDialog(getGameWindow(), "Could not load a saved game. Created a new game.");
     }
     return gameState;
   }
 
-  public static GameWindow getGameWindow() {
+  public GameWindow getGameWindow() {
     return gameWindow;
   }
 
-  public static GameState getGameState() {
+  public GameState getGameState() {
     return gameState;
   }
 
@@ -113,7 +143,7 @@ public class Game {
    *
    * @param state another GameState object, or null
    */
-  public static void setGameState(GameState state) {
+  public void setGameState(GameState state) {
     if (getGameState() != null) {
       DungeonLogger.warning("Called setGameState without unsetting the old game state.");
     }
@@ -123,12 +153,13 @@ public class Game {
     gameState = state;
     DungeonLogger.info("Set the GameState field in Game to a GameState.");
     // This is a new GameState that must be refreshed in order to have spawned creatures at the beginning.
-    Engine.refresh();
+    gameState.getEngine().refresh();
+
     Writer.write(new DungeonString("\n")); // Improves readability.
-    gameState.getHero().look();
+    gameState.getHero().look(gameState);
   }
 
-  public static void unsetGameState() {
+  public void unsetGameState() {
     DungeonLogger.info("Set the GameState field in Game to null.");
     gameState = null;
   }
@@ -138,7 +169,7 @@ public class Game {
    *
    * @param issuedCommand the last IssuedCommand.
    */
-  public static void renderTurn(IssuedCommand issuedCommand, StopWatch stopWatch) {
+  public void renderTurn(IssuedCommand issuedCommand, StopWatch stopWatch) {
     DungeonLogger.logCommandRenderingReport(issuedCommand.toString(), "started renderTurn", stopWatch);
     // Clears the text pane.
     getGameWindow().clearTextPane();
@@ -152,7 +183,7 @@ public class Game {
         unsetGameState();
         setGameState(getAfterDeathGameState());
       } else {
-        Engine.endTurn();
+        gameState.getEngine().endTurn();
       }
     }
     DungeonLogger.logCommandRenderingReport(issuedCommand.toString(), "finished renderTurn", stopWatch);
@@ -165,13 +196,13 @@ public class Game {
    * @param issuedCommand the last IssuedCommand.
    * @return a boolean indicating whether or not the command executed successfully
    */
-  private static boolean processInput(IssuedCommand issuedCommand) {
-    IssuedCommandEvaluation evaluation = IssuedCommandProcessor.evaluateIssuedCommand(issuedCommand);
+  private boolean processInput(IssuedCommand issuedCommand) {
+    IssuedCommandEvaluation evaluation = issuedCommandProcessor.evaluateIssuedCommand(issuedCommand);
     if (evaluation.isValid()) {
       instanceInformation.incrementAcceptedCommandCount();
       getGameState().getCommandHistory().addCommand(issuedCommand);
       getGameState().getStatistics().addCommand(issuedCommand);
-      IssuedCommandProcessor.prepareIssuedCommand(issuedCommand).execute();
+      issuedCommandProcessor.prepareIssuedCommand(issuedCommand).execute();
       return true;
     } else {
       DungeonString string = new DungeonString();
@@ -194,15 +225,15 @@ public class Game {
   /**
    * Exits the game, prompting the user if the current state should be saved if it is not already saved.
    */
-  public static void exit() {
+  public void exit() {
     if (getGameState() != null && !getGameState().isSaved()) {
-      Loader.saveGame(getGameState());
+      Loader.saveGame(getGameState(),this);
     }
     logInstanceClosing();
     System.exit(0);
   }
 
-  private static void logInstanceClosing() {
+  private void logInstanceClosing() {
     StringBuilder builder = new StringBuilder();
     builder.append("Closing instance. Ran for ");
     builder.append(instanceInformation.getDurationString());
