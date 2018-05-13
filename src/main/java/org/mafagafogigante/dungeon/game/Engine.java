@@ -11,7 +11,7 @@ import java.awt.Color;
 import java.io.Serializable;
 
 /**
- * Engine class that contains most static methods that need to be called to alter the loaded GameState.
+ * Engine class that contains most methods that need to be called to alter the loaded GameState.
  */
 public final class Engine implements Serializable{
 
@@ -25,7 +25,7 @@ public final class Engine implements Serializable{
 
 
   /**
-   * Refreshes 2the game. This method should be called whenever the state of the game is changed and the engine should be
+   * Refreshes the game. This method should be called whenever the state of the game is changed and the engine should be
    * updated. If time passed, use {@link Engine#rollDateAndRefresh(long)}.
    */
   public void refresh() {

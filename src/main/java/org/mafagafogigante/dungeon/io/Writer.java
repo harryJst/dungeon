@@ -3,6 +3,7 @@ package org.mafagafogigante.dungeon.io;
 import org.mafagafogigante.dungeon.game.DungeonString;
 import org.mafagafogigante.dungeon.game.Game;
 import org.mafagafogigante.dungeon.game.Writable;
+import org.mafagafogigante.dungeon.gui.GameWindow;
 import org.mafagafogigante.dungeon.gui.WritingSpecifications;
 
 /**
@@ -20,10 +21,10 @@ public final class Writer {
     throw new AssertionError();
   }
 
-  static Game game = new Game();
+  static GameWindow gameWindow = null;
 
-  public static void setGame(Game g){
-    game = g;
+  public static void setGame(GameWindow g){
+    gameWindow= g;
   }
 
   /**
@@ -53,8 +54,8 @@ public final class Writer {
    * @param specifications a WritingSpecifications object
    */
   public static void write(Writable writable, WritingSpecifications specifications) {
-    if (game.getGameWindow() != null) { // There will be no window when running the tests, so check to prevent a NPE.
-      game.getGameWindow().scheduleWriteToTextPane(writable, specifications);
+    if (gameWindow != null) { // There will be no window when running the tests, so check to prevent a NPE.
+      gameWindow.scheduleWriteToTextPane(writable, specifications);
       if (specifications.shouldWait()) {
         Sleeper.sleep(specifications.getWait());
       }

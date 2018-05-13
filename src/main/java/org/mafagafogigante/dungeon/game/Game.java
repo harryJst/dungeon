@@ -34,19 +34,12 @@ public final class Game implements Serializable{
     issuedCommandProcessor = new IssuedCommandProcessor(this);
   }
 
-  private void start(final Game g){
+  private void start(){
+
     final StopWatch stopWatch = new StopWatch();
-
-
     DungeonLogger.info("Started initializing Dungeon " + Version.getCurrentVersion() + ".");
-
-
-    invokeOnEventDispatchThreadAndWait(new Runnable() {
-      @Override
-      public void run() {
-        gameWindow = new GameWindow(g);
-      }
-    });
+    invokeOnEventDispatchThreadAndWait(()->  gameWindow = new GameWindow(this));
+    Writer.setGame(gameWindow);
     DungeonLogger.info("Finished making the window. Took " + stopWatch.toString() + ".");
     setGameState(getInitialGameState());
     invokeOnEventDispatchThreadAndWait(new Runnable() {
@@ -64,31 +57,14 @@ public final class Game implements Serializable{
    */
   public static void main(String[] args) {
     Game g = new Game();
-
-    //AttackAlgorithmWriter.setGame(g);
-//    ClockComponent.setGame(g);
-
-    //this should be the only component to directly set the game
-    //game should even contain the writer class as it shouldnt be statically delegated
-    Writer.setGame(g);
-//    WorldMap.setGame(g);
-//    Observer.setGame(g);
-//    Item.setGame(g);
-//    CreatureFactory.setGame(g);
-//    DebugWaitParser.setGame(g);
-//    BreakageHandler.setGame(g);
-//    Engine.setGame(g);
-//    Walker.setGame(g);
-//    Hero.setGame(g);
-
-    g.start(g);
+    g.start();
   }
 
   /**
    * Invokes a runnable on the EDT and waits for it to finish. If an exception is thrown, this method logs it and
    * finishes the application.
    */
-  private void invokeOnEventDispatchThreadAndWait(Runnable runnable) {
+   private void invokeOnEventDispatchThreadAndWait(Runnable runnable) {
     try {
       SwingUtilities.invokeAndWait(runnable);
     } catch (InterruptedException | InvocationTargetException fatal) {
@@ -101,7 +77,7 @@ public final class Game implements Serializable{
    *
    * <p>If a new GameState is created and the saves folder is empty, the tutorial is suggested.
    */
-  private GameState getInitialGameState() {
+   private GameState getInitialGameState() {
     GameState gameState = Loader.loadGame(true, this);
     if (gameState == null) {
       gameState = Loader.newGame(this);
